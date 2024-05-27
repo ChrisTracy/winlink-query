@@ -40,7 +40,7 @@ version: '3.8'
 
 services:
   app:
-    image: christracy/off-grid-weather
+    image: christracy/aprs-query
     restart: always
     environment:
       #SMTP Variables
@@ -62,9 +62,6 @@ services:
       #OAI_MODEL: gpt-3.5-turbo-0125  # GPT model to use for formating location to coordinates and units
       #OAI_MAX_TOKENS: 50             # Max tokens used to process the GPT request
       #LOG_LEVEL: INFO                # Log level for the server (INFO/DEBUG)
-
-volumes:
-  lake_monitor_volume:
 ```
 
 9. Bring up your stack by running:
