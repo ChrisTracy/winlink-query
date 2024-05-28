@@ -28,10 +28,13 @@ oai_max_tokens = int(os.getenv('OAI_MAX_TOKENS', '50'))
 # Open Weather Map Configuration
 weather_api_key = os.getenv('WEATHER_API_KEY')
 
-def move_to_label(mail, mail_id, label_name):
-    mail.store(mail_id, '+X-GM-LABELS', label_name)
-    mail.store(mail_id, '-X-GM-LABELS', '\\Inbox')  # Remove from Inbox
-    logger.info(f"Moved mail ID {mail_id} to {label_name}.")
+def move_to_label(mail, mail_id, folder_name):
+    # Moving emails in standard IMAP (MXroute does not support Gmail labels)
+    result, _ = mail.copy(mail_id, folder_name)  # Copy to another folder
+    if result == 'OK':
+        mail.store(mail_id, '+FLAGS', '\\Deleted')  # Mark the original email as deleted
+        mail.expunge()  # Permanently remove email marked as deleted
+    logger.info(f"Moved mail ID {mail_id} to {folder_name}.")
 
 # Helper to extract email body
 def extract_body(message):
@@ -48,7 +51,7 @@ def fetch_emails():
     logger.info("Starting email fetch process...")
     mail = imaplib.IMAP4_SSL(imap_host)
     mail.login(smtp_username, smtp_password)
-    mail.select('"[Gmail]/All Mail"')
+    mail.select('Inbox')
     
     status, messages = mail.search(None, '(SUBJECT "weather" UNSEEN)')
     messages = messages[0].split()
@@ -69,7 +72,7 @@ def fetch_emails():
                     move_to_label(mail, mail_id, 'Processed')
                 else:
                     logger.warning(f"Domain {domain} not in allowed list.")
-                    move_to_label(mail, mail_id, 'NotAllowed')
+                    move_to_label(mail, mail_id, 'NotAction')
     mail.close()
     mail.logout()
     logger.info("Email fetch process completed.")
