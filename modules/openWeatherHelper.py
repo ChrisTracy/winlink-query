@@ -15,6 +15,10 @@ def convert_wind_speed(speed, unit):
         return speed * 1.60934
     else:
         return speed
+    
+# Function to convert millimeters to inches
+def mm_to_inches(mm):
+    return mm / 25.4
 
 # Function to find the timezone based on latitude and longitude
 def get_timezone(lat, long):
@@ -54,6 +58,7 @@ def generate_daily_forecast(data, lat, long, unit='imperial'):
         temp_day = convert_temperature(day["temp"]["day"], unit)
         temp_min = convert_temperature(day["temp"]["min"], unit)
         temp_max = convert_temperature(day["temp"]["max"], unit)
+        humidity = day["humidity"]
         wind_speed = convert_wind_speed(day["wind_speed"], unit)
         description = day["weather"][0]["description"]
 
@@ -62,10 +67,19 @@ def generate_daily_forecast(data, lat, long, unit='imperial'):
         email_forecast += f"Day Temperature: {temp_day:.1f}°{'C' if unit == 'metric' else 'F'}\n"
         email_forecast += f"Min Temperature: {temp_min:.1f}°{'C' if unit == 'metric' else 'F'}\n"
         email_forecast += f"Max Temperature: {temp_max:.1f}°{'C' if unit == 'metric' else 'F'}\n"
+        email_forecast += f"Humidity: {humidity}%\n"
         email_forecast += f"Weather: {description}\n"
         email_forecast += f"Wind Speed: {wind_speed:.1f} {'km/h' if unit == 'metric' else 'mph'}\n"
+        if "rain" in day:
+            rain_mm = day["rain"]
+            if unit == 'imperial':
+                rain_inches = mm_to_inches(rain_mm)
+                email_forecast += f"Rain: {rain_inches:.2f} inches\n"
+            else:
+                email_forecast += f"Rain: {rain_mm:.1f} mm\n"
+
         email_forecast += "---\n\n"
-    
+
     # Adding alerts to the forecast
     if "alerts" in data:
         email_forecast += "Alerts:\n\n"
@@ -86,6 +100,7 @@ def generate_current_forecast(data, lat, long, unit='imperial'):
     date = get_date(current_weather["dt"], lat=lat, long=long)
     temp = convert_temperature(current_weather["temp"], unit)
     feels_like = convert_temperature(current_weather["feels_like"], unit)
+    humidity = current_weather["humidity"]
     wind_speed = convert_wind_speed(current_weather["wind_speed"], unit)
     description = current_weather["weather"][0]["description"]
 
@@ -94,10 +109,20 @@ def generate_current_forecast(data, lat, long, unit='imperial'):
         f"Current Weather Forecast for {lat}, {long} on {date}:\n\n"
         f"Temperature: {temp:.1f}°{'C' if unit == 'metric' else 'F'}\n"
         f"Feels Like: {feels_like:.1f}°{'C' if unit == 'metric' else 'F'}\n"
+        f"Humidity: {humidity}%\n"
         f"Weather: {description}\n"
         f"Wind Speed: {wind_speed:.1f} {'km/h' if unit == 'metric' else 'mph'}\n"
-        "---\n\n"
     )
+
+    if "rain" in current_weather and "1h" in current_weather["rain"]:
+        rain_mm = current_weather["rain"]["1h"]
+        if unit == 'imperial':
+            rain_inches = mm_to_inches(rain_mm)
+            email_forecast += f"Rain: {rain_inches:.2f} inches (last hour)\n"
+        else:
+            email_forecast += f"Rain: {rain_mm:.1f} mm (last hour)\n"
+
+    email_forecast += "---\n\n"
 
     # Adding alerts to the forecast if they exist
     if "alerts" in data:
@@ -120,6 +145,7 @@ def generate_hourly_forecast(data, lat, long, unit='imperial'):
         date_time = get_date_time(hour["dt"], lat=lat, long=long)
         temp = convert_temperature(hour["temp"], unit)
         feels_like = convert_temperature(hour["feels_like"], unit)
+        humidity = hour["humidity"]
         wind_speed = convert_wind_speed(hour["wind_speed"], unit)
         description = hour["weather"][0]["description"]
 
@@ -127,10 +153,21 @@ def generate_hourly_forecast(data, lat, long, unit='imperial'):
             f"Date & Time: {date_time}\n"
             f"Temperature: {temp:.1f}°{'C' if unit == 'metric' else 'F'}\n"
             f"Feels Like: {feels_like:.1f}°{'C' if unit == 'metric' else 'F'}\n"
+            f"Humidity: {humidity}%\n"
             f"Weather: {description}\n"
             f"Wind Speed: {wind_speed:.1f} {'km/h' if unit == 'metric' else 'mph'}\n"
-            "---\n\n"
         )
+
+        # Include rain data if present and properly extract the amount
+        if "rain" in hour and "1h" in hour["rain"]:
+            rain_mm = hour["rain"]["1h"]
+            if unit == 'imperial':
+                rain_inches = mm_to_inches(rain_mm)
+                email_forecast += f"Rain: {rain_inches:.2f} inches\n"
+            else:
+                email_forecast += f"Rain: {rain_mm:.1f} mm\n"
+                
+        email_forecast += "---\n\n"
 
     if "alerts" in data:
         email_forecast += "Alerts:\n\n"
