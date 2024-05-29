@@ -49,32 +49,50 @@ def extract_body(message):
 # Get emails with subject weather that are unread and parse data
 def fetch_emails():
     logger.info("Starting email fetch process...")
-    mail = imaplib.IMAP4_SSL(imap_host)
-    mail.login(smtp_username, smtp_password)
-    mail.select('Inbox')
-    
-    status, messages = mail.search(None, '(SUBJECT "weather" UNSEEN)')
-    messages = messages[0].split()
-    logger.info(f"Found {len(messages)} messages with specified subject and unseen status.")
+    try:
+        mail = imaplib.IMAP4_SSL(imap_host)
+        mail.login(smtp_username, smtp_password)
+        mail.select('Inbox')
+        
+        status, messages = mail.search(None, '(SUBJECT "weather" UNSEEN)')
+        if status != 'OK':
+            logger.error("Failed to search for emails.")
+            return
+        
+        messages = messages[0].split()
+        logger.info(f"Found {len(messages)} messages with specified subject and unseen status.")
 
-    for mail_id in messages:
-        status, data = mail.fetch(mail_id, '(RFC822)')
-        for response_part in data:
-            if isinstance(response_part, tuple):
-                message = email.message_from_bytes(response_part[1])
-                from_field = message['from']
-                domain = from_field.split('@')[-1].strip('>')
-                logger.info(f"Email from: {from_field}")
-                logger.info(f"Domain extracted: {domain}")
-                if '*' in allowed_domains or domain in allowed_domains:
-                    logger.info("Handling email from allowed domain...")
-                    handle_email(message)
-                    move_to_label(mail, mail_id, 'Processed')
-                else:
-                    logger.warning(f"Domain {domain} not in allowed list.")
-                    move_to_label(mail, mail_id, 'NotAction')
-    mail.close()
-    mail.logout()
+        for mail_id in messages:
+            status, data = mail.fetch(mail_id, '(RFC822)')
+            if status != 'OK':
+                logger.error(f"Failed to fetch email with ID {mail_id}.")
+                continue
+
+            for response_part in data:
+                if isinstance(response_part, tuple):
+                    message = email.message_from_bytes(response_part[1])
+                    from_field = message['from']
+                    domain = from_field.split('@')[-1].strip('>')
+                    logger.info(f"Email from: {from_field}")
+                    logger.info(f"Domain extracted: {domain}")
+                    
+                    if '*' in allowed_domains or domain in allowed_domains:
+                        logger.info("Handling email from allowed domain...")
+                        handle_email(message)
+                        move_to_label(mail, mail_id, 'Processed')
+                    else:
+                        logger.warning(f"Domain {domain} not in allowed list.")
+                        move_to_label(mail, mail_id, 'NotAction')
+
+    except Exception as e:
+        logger.error(f"An error occurred during email fetching: {str(e)}")
+    finally:
+        try:
+            mail.close()
+            mail.logout()
+        except:
+            logger.error("Failed to close or logout from IMAP session.")
+            
     logger.info("Email fetch process completed.")
 
 # Determine report type and send to handle_weather_report
