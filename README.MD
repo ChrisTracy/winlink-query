@@ -1,33 +1,30 @@
 # APRS Query Service
 
-I developed this project for APRS Amateur Radio enthusiasts, leveraging OpenAI's capabilities to process user input. It allows users to send an email requesting weather data for any location worldwide. The system utilizes Open Weather Map to retrieve accurate weather information and automatically responds with an email containing the detailed weather data.
+## Overview
+The APRS Query Service is designed for APRS Amateur Radio enthusiasts, integrating OpenAI's advanced capabilities to accurately process user inputs. This service allows users to send emails to request weather data for any global location, utilizing Open Weather Map for precise weather updates. The response includes comprehensive weather information delivered directly via email.
 
-## Using My Environment
+## Access and Usage
+This system is personally hosted and maintained with a commitment to responsible use. Access is currently restricted to users affiliated with winlink.org. Eligible users must have an active amateur radio call sign and a winlink.org email address.
 
-I am committed to personally hosting and supporting this system, provided it is used responsibly. Currently, this service is exclusively available to users affiliated with winlink.org. If you have an active amateur radio call sign and a winlink email, you can test the service by sending an email in the following formats:
+### How to Use
+Email your weather requests to `weather@radiolake.com` with the following formats:
 
-**To:** aprsquery@gmail.com
+#### Current Weather *(using city, state in the body)*
+- **Subject:** `weather:current`
+- **Body:** `Houston, Texas`
 
-### Current Weather
-To get the current weather for a specific location:
-- **Subject:** weather:current
-- **Body:** Houston, Texas
+#### 7-Day Forecast *(using a zip code in the body)*
+- **Subject:** `weather:daily`
+- **Body:** `90048`
 
-### 7-Day Forecast
-To request a 7-day weather forecast for a specific zip code:
-- **Subject:** weather:daily
-- **Body:** Provide the weather for zip code 90048
+#### Hourly Forecast *(using coordinates with unit preference)*
+- **Subject:** `weather:hourly`
+- **Body:** `provide the weather for 51.510047731805415, -0.04960678749831505 using the metric system`
 
-### Hourly Forecast
-To obtain an hourly weather forecast using coordinates and the metric system:
-- **Subject:** weather:hourly
-- **Body:** Provide the weather forecast for 51.510047731805415, -0.04960678749831505. Provide the results in metric.
+The system leverages OpenAI to understand various phrasing styles, though it's recommended to keep requests straightforward for optimal processing. Results are returned in imperial format by default but you can request metric by simply asking in your email (eg, `London, Egland in metric format`).
 
-Feel free to phrase your email requests in your own style, as this system utilizes OpenAI for processing input. However, for the best results, keep your requests concise.
-
-
-
-## Setup your own server
+## Setting Up Your Server
+To deploy your own instance of the APRS Query Service, follow these steps:
 
 1. Create a docker-compose.yml file:
 ```bash
@@ -64,8 +61,14 @@ services:
       #LOG_LEVEL: INFO                # Log level for the server (INFO/DEBUG)
 ```
 
-9. Bring up your stack by running:
+3. Bring up your stack by running:
 
 ```bash
 docker compose up -d
 ```
+
+## Support
+
+If you find the service helpful or enjoy using it, please consider supporting me.
+
+[![Ko-Fi](https://img.shields.io/badge/Ko--fi-F16061?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/ctracy)
