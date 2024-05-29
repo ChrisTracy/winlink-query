@@ -82,7 +82,7 @@ def fetch_emails():
                         move_to_label(mail, mail_id, 'Processed')
                     else:
                         logger.warning(f"Domain {domain} not in allowed list.")
-                        move_to_label(mail, mail_id, 'NotAction')
+                        move_to_label(mail, mail_id, 'NoAction')
 
     except Exception as e:
         logger.error(f"An error occurred during email fetching: {str(e)}")
