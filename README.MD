@@ -1,9 +1,9 @@
-# APRS Query Service
+# Winlink Query Service
 
 ## Overview
-The APRS Query Service is designed for APRS Amateur Radio enthusiasts, integrating OpenAI's advanced capabilities to accurately process user inputs. This service allows users to send emails to request weather data for any global location, utilizing Open Weather Map for precise weather updates. The response includes comprehensive weather information delivered directly via email.
+The Winlink Query Service is designed for Amateur Radio enthusiasts, integrating OpenAI's advanced capabilities to accurately process user inputs. This service allows users to send emails to request weather data for any global location, utilizing Open Weather Map for precise weather updates. The response includes comprehensive weather information delivered directly via email.
 
-## Access and Usage
+## Access, Usage & Rate Limits
 This system is personally hosted and maintained with a commitment to responsible use. Access is currently restricted to users affiliated with winlink.org. Eligible users must have an active amateur radio call sign and a winlink.org email address.
 
 ### How to Use
@@ -23,8 +23,13 @@ Email your weather requests to `weather@radiolake.com` with the following format
 
 The system leverages OpenAI to understand various phrasing styles, though it's recommended to keep requests straightforward for optimal processing. Results are returned in imperial format by default but you can request metric by simply asking in your email (eg, `London, Egland in metric format`).
 
+### Rate Limits
+- **Time:** This server is setup to respnd to requests within `3 minutes`
+- **Rate Limit:** Each email adress is allowed one request in the 3 minute window. Wait until you receive a response to send another request.
+- **Bots:** This service was orginally built for individuals to request the weather forecast when traditional means are not available. Bots/scripts of any kind are not supported and will result in a ban.
+
 ## Setting Up Your Server
-To deploy your own instance of the APRS Query Service, follow these steps:
+To deploy your own instance of the Winlink Query Service, follow these steps:
 
 1. Create a docker-compose.yml file:
 ```bash
@@ -37,7 +42,7 @@ version: '3.8'
 
 services:
   app:
-    image: christracy/aprs-query
+    image: christracy/winlink-query
     restart: always
     environment:
       #SMTP Variables
