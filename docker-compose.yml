@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    image: christracy/aprs-query
+    image: christracy/winlink-query
     restart: always
     environment:
       #SMTP Variables
